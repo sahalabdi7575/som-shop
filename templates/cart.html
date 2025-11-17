@@ -1,0 +1,134 @@
+<!-- templates/checkout.html -->
+{% extends "base.html" %}
+
+{% block title %}Checkout - SomaliShop{% endblock %}
+
+{% block content %}
+
+
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Checkout Form -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-6">Shipping Information</h2>
+            
+            <form id="checkoutForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input type="text" name="full_name" required 
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input type="tel" name="phone_number" required 
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="+252">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Address</label>
+                    <textarea name="address" rows="3" required 
+                              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">City</label>
+                    <input type="text" name="city" required 
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </form>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-6">Order Summary</h2>
+            
+            <div class="space-y-4 mb-6">
+                {% for item in cart_items %}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        {% if item.image_url %}
+                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-12 h-12 object-cover rounded">
+                        {% else %}
+                        <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <p class="font-medium">{{ item.name }}</p>
+                            <p class="text-sm text-gray-500">Qty: {{ item.quantity }}</p>
+                        </div>
+                    </div>
+                    <p class="font-semibold">{{ format_currency(item.price * item.quantity) }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="border-t pt-4 space-y-2">
+                <div class="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>{{ format_currency(total) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Shipping</span>
+                    <span class="text-green-600">Free</span>
+                </div>
+                <div class="flex justify-between text-lg font-semibold border-t pt-2">
+                    <span>Total</span>
+                    <span class="text-blue-600">{{ format_currency(total) }}</span>
+                </div>
+            </div>
+            
+            <button onclick="processPayment()" 
+                    class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition font-semibold mt-6">
+                Complete Order
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function processPayment() {
+    const formData = new FormData(document.getElementById('checkoutForm'));
+    
+    fetch('{{ url_for("process_payment") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Order placed successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = '/order-success/' + data.order_id;
+            }, 2000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error processing payment', 'error');
+    });
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-transform duration-300 ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmed - SomaliShop{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Success Header -->
+    <div class="text-center mb-8">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-green-600 text-3xl"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Order Confirmed!</h1>
+        <p class="text-xl text-gray-600">Thank you for your purchase. Your order has been received.</p>
+        <p class="text-gray-500 mt-2">Order #{{ order.id }}</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Order Details -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Order Details</h2>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <h3 class="font-semibold text-gray-700">Order Date</h3>
+                        <p class="text-gray-600">{{ order.created_at[:10] }}</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-700">Order Status</h3>
+                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm font-medium">
+                            {{ order.status|title }}
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-700">Payment Status</h3>
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">
+                            {{ order.payment_status|title }}
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-700">Total Amount</h3>
+                        <p class="text-blue-600 font-semibold">{{ format_currency(order.total_amount) }}</p>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <h3 class="font-semibold text-gray-700 mb-3">Items Ordered</h3>
+                <div class="space-y-3">
+                    {% for item in order.order_items %}
+                    <div class="flex items-center justify-between py-2 border-b border-gray-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                                {% if item.products.image_url %}
+                                <img src="{{ item.products.image_url }}" 
+                                     alt="{{ item.products.name }}" 
+                                     class="w-12 h-12 object-cover rounded">
+                                {% else %}
+                                <i class="fas fa-image text-gray-400"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">{{ item.products.name }}</h4>
+                                <p class="text-gray-600 text-sm">Qty: {{ item.quantity }}</p>
+                            </div>
+                        </div>
+                        <span class="font-semibold">{{ format_currency(item.price * item.quantity) }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Delivery Information</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="font-semibold text-gray-700">Contact Phone</h3>
+                        <p class="text-gray-600">{{ order.customer_phone }}</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-700">Payment Method</h3>
+                        <p class="text-gray-600">Mobile Money</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h3 class="font-semibold text-gray-700">Delivery Note</h3>
+                    <p class="text-gray-600">We'll contact you at the provided phone number to arrange delivery.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                <h2 class="text-xl font-semibold mb-4">What's Next?</h2>
+                
+                <div class="space-y-4 mb-6">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <i class="fas fa-phone text-sm"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="font-semibold">Delivery Confirmation</h3>
+                            <p class="text-sm text-gray-600">We'll call you within 24 hours to confirm delivery details.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <i class="fas fa-truck text-sm"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="font-semibold">Shipping</h3>
+                            <p class="text-sm text-gray-600">Your order will be delivered within 2-3 business days.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <i class="fas fa-headset text-sm"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="font-semibold">Need Help?</h3>
+                            <p class="text-sm text-gray-600">Contact us via WhatsApp for any questions.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button onclick="printReceipt()" 
+                            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center">
+                        <i class="fas fa-print mr-3"></i>
+                        Print Receipt
+                    </button>
+                    
+                    <a href="{{ url_for('products') }}" 
+                       class="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition font-semibold text-center block">
+                        Continue Shopping
+                    </a>
+                    
+                    <a href="https://wa.me/2520907251291?text=Hello%20SomaliShop%2C%20I%20have%20a%20question%20about%20my%20order%20%23{{ order.id }}" 
+                       target="_blank"
+                       class="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition font-semibold text-center block">
+                        <i class="fab fa-whatsapp mr-2"></i>Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Printable Receipt (Hidden) -->
+<div id="printableReceipt" class="hidden">
+    <div class="p-8 max-w-md mx-auto">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold">SomaliShop</h1>
+            <p class="text-gray-600">Your Trusted Online Marketplace</p>
+        </div>
+        
+        <div class="border-t border-b border-gray-300 py-4 mb-4">
+            <div class="flex justify-between mb-2">
+                <span class="font-semibold">Order #:</span>
+                <span>{{ order.id }}</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span class="font-semibold">Date:</span>
+                <span>{{ order.created_at[:10] }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="font-semibold">Phone:</span>
+                <span>{{ order.customer_phone }}</span>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <h2 class="font-semibold mb-2">Items:</h2>
+            {% for item in order.order_items %}
+            <div class="flex justify-between mb-1">
+                <span>{{ item.products.name }} x{{ item.quantity }}</span>
+                <span>{{ format_currency(item.price * item.quantity) }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="border-t border-gray-300 pt-4">
+            <div class="flex justify-between mb-1">
+                <span>Subtotal:</span>
+                <span>{{ format_currency(order.total_amount / 1.1) }}</span>
+            </div>
+            <div class="flex justify-between mb-1">
+                <span>Tax (10%):</span>
+                <span>{{ format_currency(order.total_amount * 0.1) }}</span>
+            </div>
+            <div class="flex justify-between font-semibold text-lg">
+                <span>Total:</span>
+                <span>{{ format_currency(order.total_amount) }}</span>
+            </div>
+        </div>
+        
+        <div class="text-center mt-8 pt-4 border-t border-gray-300">
+            <p class="text-sm text-gray-600">Thank you for your purchase!</p>
+            <p class="text-sm text-gray-600">Contact: +252 90 7251291</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function printReceipt() {
+    const receiptContent = document.getElementById('printableReceipt').innerHTML;
+    const originalContent = document.body.innerHTML;
+    
+    document.body.innerHTML = receiptContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+    window.location.reload();
+}
+
+// Show success animation
+setTimeout(() => {
+    const confetti = document.createElement('div');
+    confetti.innerHTML = `
+        <style>
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            top: 0;
+            opacity: 0;
+        }
+        </style>
+    `;
+    document.body.appendChild(confetti);
+    
+    // Simple confetti effect
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            const confettiPiece = document.createElement('div');
+            confettiPiece.className = 'confetti';
+            confettiPiece.style.left = Math.random() * 100 + 'vw';
+            confettiPiece.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            confettiPiece.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+            
+            document.body.appendChild(confettiPiece);
+            
+            setTimeout(() => {
+                confettiPiece.remove();
+            }, 5000);
+        }, i * 100);
+    }
+}, 1000);
+</script>
+
+<style>
+@keyframes fall {
+    to {
+        top: 100vh;
+        opacity: 0;
+        transform: translateX(100px) rotate(360deg);
+    }
+}
+</style>
+{% endblock %}
